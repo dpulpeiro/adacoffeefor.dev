@@ -1,4 +1,4 @@
-DOCKER_IMAGE_NAME=react-typescript-tailwind-eslint-prettier
+DOCKER_IMAGE_NAME=adacoffeefor.dev
 PROD_TAG=0.0.1
 
 # Use any -slim version
