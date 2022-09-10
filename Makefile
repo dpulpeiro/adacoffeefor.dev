@@ -2,7 +2,7 @@ DOCKER_IMAGE_NAME=adacoffeefor.dev
 PROD_TAG=0.0.1
 
 # Use any -slim version
-NODE_VERSION=16.17.0-slim
+NODE_VERSION=14.17.0-slim
 NGINX_VERSION=1.23.1-alpine
 
 dev/build:
