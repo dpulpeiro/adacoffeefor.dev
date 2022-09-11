@@ -3,6 +3,8 @@
 Project to create simple markdown buttons to donate ADA. 
 
 Small project to learn how to make transactions using the CIP30 standard and the cardano-serialization-lib .  
+
+
 ## 🧐 Project structure
     .
     ├── devops              -> Contains Dockerfiles ready to for for both development and production environments
@@ -35,3 +37,5 @@ Small project to learn how to make transactions using the CIP30 standard and the
     ```
     make prod/local
     ```
+
+Code in cardano.ts is highly inspired by [cardano-wallet-connector](https://github.com/dynamicstrategies/cardano-wallet-connector) but packed in a class

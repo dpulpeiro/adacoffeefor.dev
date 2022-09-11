@@ -22,10 +22,6 @@ declare global {
 }
 
 export default class Cardano {
-  private readonly provider: any
-
-  private readonly apiKey: any
-
   /**
    * Protocol parameters
    * @type {{
@@ -78,10 +74,7 @@ export default class Cardano {
     usedAddress: undefined,
   }
 
-  constructor() {
-    this.provider = process.env.PROVIDER
-    this.apiKey = process.env.API_KEY
-  }
+  constructor() {}
 
   /**
    * Poll the wallets it can read from the browser.
