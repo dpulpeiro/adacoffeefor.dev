@@ -12,6 +12,7 @@ import {
   Value,
 } from '@emurgo/cardano-serialization-lib-asmjs'
 import {Buffer} from 'buffer';
+import {toast} from "react-hot-toast";
 
 declare global {
   interface Window {
@@ -106,7 +107,7 @@ export default class Cardano {
       }, 1000)
       return
     }
-    this.state = { ...this.state, wallets, whichWalletSelected: wallets[1] }
+    this.state = { ...this.state, wallets, whichWalletSelected: wallets[0] }
     this.refreshData()
   }
 
@@ -144,7 +145,7 @@ export default class Cardano {
       const walletName = this.state.whichWalletSelected
       walletIsEnabled = await window.cardano[walletName].isEnabled()
     } catch (err) {
-      console.log(err)
+      toast.error('Wallet not enabled')
     }
     this.state = { ...this.state, walletIsEnabled }
     return walletIsEnabled
@@ -163,7 +164,7 @@ export default class Cardano {
     try {
       this.API = await window.cardano[walletKey].enable()
     } catch (err) {
-      console.log(err)
+      toast.error('Error enabling wallet')
     }
     return this.checkIfWalletEnabled()
   }
@@ -205,7 +206,7 @@ export default class Cardano {
       const networkId = await this.API?.getNetworkId()
       this.state = { ...this.state, networkId }
     } catch (err) {
-      console.log(err)
+      toast.error('Error getting network Id')
     }
   }
 
@@ -234,17 +235,14 @@ export default class Cardano {
         if (multiasset) {
           const keys = multiasset.keys() // policy Ids of thee multiasset
           const N = keys.len()
-          // console.log(`${N} Multiassets in the UTXO`)
 
           for (let i = 0; i < N; i++) {
             const policyId = keys.get(i)
             const policyIdHex = Buffer.from(policyId.to_bytes()).toString('hex')
-            // console.log(`policyId: ${policyIdHex}`)
             const assets = multiasset.get(policyId)
             if (assets !== undefined) {
               const assetNames = assets.keys()
               const K = assetNames.len()
-              // console.log(`${K} Assets in the Multiasset`)
 
               for (let j = 0; j < K; j++) {
                 const assetName = assetNames.get(j)
@@ -252,8 +250,6 @@ export default class Cardano {
                 const assetNameHex = Buffer.from(assetName.name()).toString('hex')
                 const multiassetAmt = multiasset.get_asset(policyId, assetName)
                 multiAssetStr += `+ ${multiassetAmt.to_str()} + ${policyIdHex}.${assetNameHex} (${assetNameString})`
-                // console.log(assetNameString)
-                // console.log(`Asset Name: ${assetNameHex}`)
               }
             }
           }
@@ -268,11 +264,10 @@ export default class Cardano {
           TransactionUnspentOutput: utxo,
         }
         Utxos.push(obj)
-        // console.log(`utxo: ${str}`)
       }
       this.state = { ...this.state, Utxos }
     } catch (err) {
-      console.log(err)
+      toast.error('Error getting UTXOS')
     }
   }
 
@@ -289,7 +284,7 @@ export default class Cardano {
     const CollatUtxos: any = []
 
     try {
-      let collateral = []
+      let collateral;
 
       const wallet = this.state.whichWalletSelected
       if (wallet === 'nami') {
@@ -301,11 +296,10 @@ export default class Cardano {
       for (const x of collateral) {
         const utxo = TransactionUnspentOutput.from_bytes(Buffer.from(x, 'hex'))
         CollatUtxos.push(utxo)
-        // console.log(utxo)
       }
       this.state = { ...this.state, CollatUtxos }
     } catch (err) {
-      console.log(err)
+      toast.error('Error getting collateral')
     }
   }
 
@@ -322,7 +316,7 @@ export default class Cardano {
       const balance = Value.from_bytes(Buffer.from(balanceCBORHex, 'hex')).coin().to_str()
       this.state = { ...this.state, balance }
     } catch (err) {
-      console.log(err)
+      toast.error('Error getting balance')
     }
   }
 
@@ -337,9 +331,8 @@ export default class Cardano {
       const changeAddress = Address.from_bytes(Buffer.from(raw, 'hex')).to_bech32()
 
       this.state = { ...this.state, changeAddress }
-      console.log(this.state)
     } catch (err) {
-      console.log(err)
+      toast.error('Error getting change address')
     }
   }
 
@@ -352,10 +345,9 @@ export default class Cardano {
       const raw = await this.API.getRewardAddresses()
       const rawFirst = raw[0]
       const rewardAddress = Address.from_bytes(Buffer.from(rawFirst, 'hex')).to_bech32()
-      // console.log(rewardAddress)
       this.state = { ...this.state, rewardAddress }
     } catch (err) {
-      console.log(err)
+      toast.error('Error getting reward address')
     }
   }
 
@@ -368,10 +360,9 @@ export default class Cardano {
       const raw = await this.API.getUsedAddresses()
       const rawFirst = raw[0]
       const usedAddress = Address.from_bytes(Buffer.from(rawFirst, 'hex')).to_bech32()
-      // console.log(rewardAddress)
       this.state = { ...this.state, usedAddress }
     } catch (err) {
-      console.log(err)
+      toast.error('Error getting used addresses')
     }
   }
 
@@ -382,7 +373,6 @@ export default class Cardano {
   refreshData = async () => {
     try {
       const walletFound = this.checkIfWalletFound()
-      console.log(walletFound)
       if (walletFound) {
         await this.getAPIVersion()
         await this.getWalletName()
@@ -396,7 +386,6 @@ export default class Cardano {
           await this.getRewardAddresses()
           await this.getUsedAddresses()
         } else {
-          console.log('aa')
           this.state = {
             ...this.state,
             Utxos: null,
@@ -429,7 +418,7 @@ export default class Cardano {
         }
       }
     } catch (err) {
-      console.log(err)
+      toast.error('Error refreshing data')
     }
   }
 
@@ -440,7 +429,7 @@ export default class Cardano {
    * @returns {Promise<TransactionBuilder>}
    */
   initTransactionBuilder = async () => {
-    const txBuilder = TransactionBuilder.new(
+    return TransactionBuilder.new(
       TransactionBuilderConfigBuilder.new()
         .fee_algo(
           LinearFee.new(
@@ -456,8 +445,6 @@ export default class Cardano {
         .prefer_pure_change(true)
         .build(),
     )
-
-    return txBuilder
   }
 
   /**
@@ -516,18 +503,14 @@ export default class Cardano {
 
     let txVkeyWitnesses = await this.API.signTx(Buffer.from(tx.to_bytes()).toString('hex'), true)
 
-    console.log(txVkeyWitnesses)
-
     txVkeyWitnesses = TransactionWitnessSet.from_bytes(Buffer.from(txVkeyWitnesses, 'hex'))
 
     transactionWitnessSet.set_vkeys(txVkeyWitnesses.vkeys())
 
     const signedTx = Transaction.new(tx.body(), transactionWitnessSet)
 
-    const submittedTxHash = await this.API.submitTx(
+    return await this.API.submitTx(
       Buffer.from(signedTx.to_bytes()).toString('hex'),
     )
-    console.log(submittedTxHash)
-    return submittedTxHash
   }
 }
