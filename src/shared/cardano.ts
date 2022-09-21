@@ -12,7 +12,7 @@ import {
   Value,
 } from '@emurgo/cardano-serialization-lib-asmjs'
 import {Buffer} from 'buffer';
-import {toast} from "react-hot-toast";
+import {toast} from 'react-hot-toast';
 
 declare global {
   interface Window {
@@ -73,8 +73,6 @@ export default class Cardano {
     rewardAddress: undefined,
     usedAddress: undefined,
   }
-
-  constructor() {}
 
   /**
    * Poll the wallets it can read from the browser.
