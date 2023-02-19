@@ -16,7 +16,7 @@ jobs:
           IMAGE: ghcr.io/dpulpeiro/adacoffeefor.dev
         run: |
           export TAG=$(git log -1 --format=%h --quiet | awk -F@ '{print $1}')
-          export DOCKER_IMAGE="$IMAGE/$TAG"
+          export DOCKER_IMAGE="$IMAGE:$TAG"
           DOCKER_BUILDKIT=1 docker build \
             -f devops/prod/Dockerfile \
             -t ${DOCKER_IMAGE} \
