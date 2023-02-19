@@ -1,0 +1,27 @@
+name: publish
+on: [push]
+jobs:
+  publish-docker-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build the adacoffeefor.dev Docker image
+        env:
+          IMAGE: ghcr.io/dpulpeiro/adacoffeefor.dev
+        run: |
+          export TAG=$(git log -1 --format=%h --quiet | awk -F@ '{print $1}')
+          export DOCKER_IMAGE="$IMAGE/$TAG"
+          DOCKER_BUILDKIT=1 docker build \
+            -f devops/prod/Dockerfile \
+            -t ${DOCKER_IMAGE} \
+            . && \
+          echo "build finished" && \
+          docker push $DOCKER_IMAGE && \
+          git tag "release/$TAG" && \
+          git push origin --tags
