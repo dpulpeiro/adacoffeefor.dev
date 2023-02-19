@@ -2,11 +2,10 @@ ARG NODE_VERSION=16.17.0-slim
 FROM node:$NODE_VERSION  as build
 WORKDIR /app
 
-COPY package*.json .
-
-RUN npm ci
 COPY . .
-RUN npm run build
+
+RUN npm i && \
+    npm run build
 
 ARG NGINX_VERSION=1.23.1-alpine
 
